@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Card.Club — Игровой калькулятор дохода партнёра</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0a2f28 0%, #051e19 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 24px 16px;
+            min-height: 100vh;
+        }
+        .game-container {
+            max-width: 780px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 56px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.4);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .hero {
+            background: linear-gradient(135deg, #1a5f50, #0f3e33);
+            padding: 28px 24px 20px;
+            color: white;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            opacity: 0.85;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .level-badge {
+            background: rgba(255,215,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .xp-bar-container {
+            background: #2d5a4e;
+            border-radius: 40px;
+            margin-top: 18px;
+            padding: 3px;
+        }
+        .xp-fill {
+            background: #ffd966;
+            width: 0%;
+            height: 12px;
+            border-radius: 30px;
+            transition: width 0.4s ease;
+        }
+        .content {
+            padding: 28px 24px;
+        }
+        .segment-cards {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+        .seg-btn {
+            flex: 1;
+            background: #f0f5f3;
+            border: none;
+            padding: 12px 8px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            color: #1a3e35;
+        }
+        .seg-btn.active {
+            background: #1a5f50;
+            color: white;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 28px;
+        }
+        .input-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1d3b33;
+        }
+        .range-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 10px;
+            background: #dee8e4;
+            -webkit-appearance: none;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            background: #1a5f50;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .num-input {
+            width: 85px;
+            padding: 8px;
+            border-radius: 32px;
+            border: 1px solid #cbdcd6;
+            text-align: center;
+            font-weight: 600;
+            background: white;
+        }
+        .stats-panel {
+            background: #ecf7f2;
+            border-radius: 40px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .income-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .year-income {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #1a6b5b;
+        }
+        .level-progress {
+            background: white;
+            border-radius: 36px;
+            padding: 14px 16px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .level-name {
+            font-weight: 800;
+            background: #1a5f50;
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: white;
+            font-size: 0.8rem;
+        }
+        .badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0 10px;
+        }
+        .badge {
+            background: #fef6e0;
+            border-radius: 60px;
+            padding: 6px 16px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #b16300;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .social-share {
+            background: white;
+            border-radius: 32px;
+            padding: 16px;
+            border: 1px solid #d0e4dc;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .quest-btn {
+            background: #ffcd4a;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            font-family: inherit;
+            transition: 0.15s;
+            margin-top: 8px;
+        }
+        .quest-btn:active {
+            transform: scale(0.97);
+        }
+        .feedback {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            background: #eef3f1;
+            border-radius: 24px;
+            padding: 12px;
+            text-align: center;
+        }
+        .footer-note {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 28px;
+            color: #6f8f84;
+        }
+        @media (max-width: 550px) {
+            .content {
+                padding: 20px;
+            }
+            .year-income {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="hero">
+        <h1>🎮 ПРОКАЧАЙ ПАРТНЁРСТВО</h1>
+        <p>Выпускай карты → получай опыт → становись легендой</p>
+        <div class="level-badge">
+            🧙‍♂️ Ваш уровень: <span id="levelNameDisplay">Бронза</span>
+        </div>
+        <div class="xp-bar-container">
+            <div class="xp-fill" id="xpFillBar" style="width:0%"></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Выбор сегмента бизнеса -->
+        <div class="segment-cards">
+            <button class="seg-btn" data-seg="travel">🌍 Турагентство</button>
+            <button class="seg-btn" data-seg="visa">🛂 Визовый центр</button>
+            <button class="seg-btn" data-seg="realty">🏡 Недвижимость</button>
+        </div>
+
+        <!-- Количество клиентов / карт -->
+        <div class="input-group">
+            <label>👥 Новых клиентов в месяц <span id="clientsCountLabel">25</span></label>
+            <div class="range-wrapper">
+                <input type="range" id="clientsSlider" min="5" max="400" value="25" step="1">
+                <input type="number" id="clientsNumber" class="num-input" value="25" step="5" min="5" max="400">
+            </div>
+        </div>
+
+        <!-- Статистика дохода + XP -->
+        <div class="stats-panel">
+            <div class="income-row">
+                <span>💰 ГОДОВОЙ ДОХОД</span>
+                <span class="year-income" id="yearIncomeDisplay">0 ₽</span>
+            </div>
+            <div style="font-size:0.85rem; color:#2d6a4f;">💳 В среднем 3.5 карт на клиента + перевыпуски</div>
+            <div class="level-progress">
+                <span>🎯 <span id="currentXP">0</span> / <span id="nextXPNeeded">100</span> XP</span>
+                <span class="level-name" id="levelBadge">Новичок</span>
+            </div>
+        </div>
+
+        <!-- Достижения (бейджи) -->
+        <div class="badges" id="badgesArea">
+            <div class="badge">🟢 Первый выпуск (0/1)</div>
+            <div class="badge">⭐ 10 карт (0/10)</div>
+            <div class="badge">🔥 50 карт (0/50)</div>
+            <div class="badge">🏆 100 карт (0/100)</div>
+        </div>
+
+        <!-- Социальное доказательство и прокачка -->
+        <div class="social-share" id="socialBlock">
+            🏆 <strong>Стань героем</strong> — поделись результатом, вдохнови коллег!
+            <button id="shareFakeBtn" style="background:none; border:1px solid #1a5f50; border-radius:40px; padding:6px 12px; margin-top:8px; display:inline-block;">📢 Похвастаться подвигом</button>
+        </div>
+
+        <!-- Квест-кнопка (случайный бонус) -->
+        <button class="quest-btn" id="questBtn">✨ КВЕСТ: Приведи первого клиента ✨</button>
+        <div class="feedback" id="feedbackMessage">
+            💡 Нажми на квест — получи +10 XP и шанс на супербонус!
+        </div>
+        <div class="footer-note">
+            ⚡ Игровая механика по принципам Octalysis: прогресс, соц. влияние, неожиданность, чувство достижения.
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- Геймификационный движок ----------
+    // Базовые параметры
+    const COMMISSION_PER_CARD_RUB = 1250;   // 50% от средней цены выпуска
+    const CARDS_PER_CLIENT = 3.5;           // в среднем 3-5 карт на клиента (мультикарточность)
+    const RENEWAL_FACTOR = 0.9;              // ежегодные перевыпуски (почти все карты перевыпускаются)
+    
+    // XP progression: каждый уровень требует всё больше XP
+    const levelThresholds = [
+        { name: "🟢 Новичок", minXP: 0, badge: "🌱 Первые шаги" },
+        { name: "🥉 Бронза", minXP: 120, badge: "🥉 Бронзовый партнёр" },
+        { name: "🥈 Серебро", minXP: 320, badge: "🥈 Серебряный агент" },
+        { name: "🥇 Золото", minXP: 650, badge: "🥇 Золотой эксперт" },
+        { name: "💎 Платина", minXP: 1100, badge: "💎 Мастер партнёрства" },
+        { name: "👑 Гуру", minXP: 1800, badge: "👑 Легенда Card.Club" }
+    ];
+    
+    // Достижения
+    const achievements = [
+        { id: "first", label: "🟢 Первый выпуск (0/1)", required: 1, earned: false },
+        { id: "ten", label: "⭐ 10 карт (0/10)", required: 10, earned: false },
+        { id: "fifty", label: "🔥 50 карт (0/50)", required: 50, earned: false },
+        { id: "hundred", label: "🏆 100 карт (0/100)", required: 100, earned: false }
+    ];
+    
+    // Глобальные переменные
+    let currentClients = 25;
+    let currentSegment = "travel";   // travel, visa, realty (пока не влияет на комиссию, только на эмоции)
+    let totalXP = 0;
+    let totalCardsIssued = 0;         // совокупное количество выпущенных карт (виртуальных за всё время)
+    let unlockedAchievements = [];
+    
+    // DOM элементы
+    const clientsSlider = document.getElementById('clientsSlider');
+    const clientsNumber = document.getElementById('clientsNumber');
+    const clientsCountLabel = document.getElementById('clientsCountLabel');
+    const yearIncomeDisplay = document.getElementById('yearIncomeDisplay');
+    const currentXPSpan = document.getElementById('currentXP');
+    const nextXPNeededSpan = document.getElementById('nextXPNeeded');
+    const levelBadgeSpan = document.getElementById('levelBadge');
+    const levelNameDisplay = document.getElementById('levelNameDisplay');
+    const xpFillBar = document.getElementById('xpFillBar');
+    const badgesArea = document.getElementById('badgesArea');
+    const questBtn = document.getElementById('questBtn');
+    const feedbackDiv = document.getElementById('feedbackMessage');
+    const shareBtn = document.getElementById('shareFakeBtn');
+    
+    // Вспомогательные функции
+    function formatMoney(val) {
+        return val.toLocaleString('ru-RU') + ' ₽';
+    }
+    
+    // Расчёт количества выпущенных карт за год (на основе новых клиентов)
+    function calculateTotalCardsIssued(clients) {
+        let directIssues = clients * CARDS_PER_CLIENT;
+        let renewals = directIssues * RENEWAL_FACTOR;
+        return Math.floor(directIssues + renewals);
+    }
+    
+    // Доход за год
+    function calculateYearlyIncome(clients) {
+        let totalCards = calculateTotalCardsIssued(clients);
+        return totalCards * COMMISSION_PER_CARD_RUB;
+    }
+    
+    // Обновление XP на основе общего числа выпущенных карт (накопленных)
+    function updateXPAndLevel() {
+        // XP начисляется 1 XP за каждую выпущенную карту (история)
+        let calculatedXP = totalCardsIssued;
+        totalXP = calculatedXP;
+        // Найти текущий уровень
+        let currentLevel = levelThresholds[0];
+        let nextThreshold = 100;
+        for (let i = 0; i < levelThresholds.length; i++) {
+            if (totalXP >= levelThresholds[i].minXP) {
+                currentLevel = levelThresholds[i];
+                if (i+1 < levelThresholds.length) nextThreshold = levelThresholds[i+1].minXP;
+                else nextThreshold = levelThresholds[i].minXP + 200;
+            }
+        }
+        let xpForNext = nextThreshold - totalXP;
+        if (xpForNext < 0) xpForNext = 0;
+        let xpInCurrent = totalXP - currentLevel.minXP;
+        let currentMax = nextThreshold - currentLevel.minXP;
+        let progressPercent = (xpInCurrent / currentMax) * 100;
+        if (currentMax <= 0) progressPercent = 100;
+        progressPercent = Math.min(100, Math.max(0, progressPercent));
+        
+        levelBadgeSpan.innerText = currentLevel.name;
+        levelNameDisplay.innerText = currentLevel.name;
+        currentXPSpan.innerText = totalXP;
+        nextXPNeededSpan.innerText = xpForNext;
+        xpFillBar.style.width = progressPercent + '%';
+        
+        // Обновить достижения (на основе totalCardsIssued)
+        updateAchievementsUI();
+    }
+    
+    function updateAchievementsUI() {
+        achievements.forEach(ach => {
+            let earnedNow = (totalCardsIssued >= ach.required);
+            if (earnedNow && !ach.earned) {
+                ach.earned = true;
+                feedbackDiv.innerHTML = `🎉 Достижение получено: ${ach.label} 🎉<br> +50 XP бонус!`;
+                totalCardsIssued += 50;   // награда за новое достижение (дополнительный опыт)
+                updateAllFromClients();    // пересчитать всё
+                setTimeout(() => {
+                    if (feedbackDiv.innerHTML.includes("Достижение получено")) {
+                        feedbackDiv.innerHTML = "✨ Отлично! Прокачка продолжается ✨";
+                    }
+                }, 2500);
+            }
+        });
+        
+        // Перерисовка бейджей
+        badgesArea.innerHTML = achievements.map(ach => {
+            let status = ach.earned ? "✅ " : "🔘 ";
+            let countShow = Math.min(totalCardsIssued, ach.required);
+            let label = status + ach.label.replace(/\(.*\)/, `(${Math.min(totalCardsIssued, ach.required)}/${ach.required})`);
+            let style = ach.earned ? 'background:#d4f0e4; color:#1a5f50;' : '';
+            return `<div class="badge" style="${style}">${label}</div>`;
+        }).join('');
+    }
+    
+    // Обновление всех показателей от количества клиентов за месяц
+    function updateAllFromClients() {
+        let clients = currentClients;
+        clientsCountLabel.innerText = clients;
+        let yearlyIncome = calculateYearlyIncome(clients);
+        let cardsIssuedThisYear = calculateTotalCardsIssued(clients);
+        // Накопленные карты = предыдущее значение? Важно: чтобы XP росло не только за годовой прогноз, а за суммарную активность.
+        // Используем текущее значение totalCardsIssued как базу накопленных выпусков, но при изменении ползунка показываем "потенциальный доход",
+        // а XP пусть растет от прогресса. Но для геймификации лучше начислять XP за "совершённые действия" - имитируем нажатие кнопки квеста.
+        // Однако, для ощущения прокачки при подборе клиентов дадим "виртуальный XP" за каждый дополнительный выпуск.
+        // Сделаем так: при изменении ползунка будет пересчитываться "прогнозируемый общий выпуск за год", но накопленный XP (totalCardsIssued) может изменяться
+        // только через квест. Чтобы ползунок давал ощущение роста, добавим механизм "симуляции опыта": при достижении новых рекордов начисляется бонус.
+        // Но правильнее: XP начисляется за "завершённые квесты". При изменении слайдера просто показываем доход, но пользователь сам нажимает "квест" для прокачки.
+        // Однако для динамики создадим систему: при изменении числа клиентов выше 10,20,50 и тд выдаём маленькие бонусы один раз.
+        // Реализуем разовое начисление XP за достижение вех в слайдере (чтобы игра была активной).
+        yearIncomeDisplay.innerText = formatMoney(yearlyIncome);
+        // Сохраняем в data-атрибуты для квеста
+        document.getElementById('clientsSlider').dataset.lastClients = clients;
+        
+        // Дополнительно: если в ручную не меняли XP, оставляем накопленное.
+        updateXPAndLevel();
+    }
+    
+    // Функция начисления XP за квест + случайный бонус
+    function doQuest() {
+        let addedXP = 10; // базовый опыт
+        let randomBonus = Math.random();
+        let bonusText = "";
+        let extraCards = 0;
+        if (randomBonus < 0.2) {
+            addedXP += 40;
+            bonusText = "🔥 СУПЕРБОНУС! +40 XP 🔥";
+            extraCards = 35;
+        } else if (randomBonus < 0.5) {
+            addedXP += 15;
+            bonusText = "✨ Класс! +15 XP ✨";
+            extraCards = 12;
+        } else {
+            bonusText = "👍 +10 XP";
+            extraCards = 8;
+        }
+        // За выполнение квеста увеличиваем общее количество выпущенных карт (симулируем новых клиентов)
+        totalCardsIssued += extraCards;
+        totalXP += addedXP;
+        updateXPAndLevel();
+        feedbackDiv.innerHTML = `🏆 Квест выполнен! ${bonusText}<br> Совершено ${extraCards} виртуальных выпусков. Итоговый выпуск карт: ${totalCardsIssued}`;
+        // Также обновляем доход при текущем потоке не меняем, даём ощущение прогресса накоплений.
+        updateAllFromClients();
+        // показываем обновлённые достижения
+        setTimeout(() => {
+            if (feedbackDiv.innerHTML.includes("Квест выполнен")) {
+                feedbackDiv.innerHTML = "💪 Новые квесты будут скоро! Продолжай прокачку.";
+            }
+        }, 3200);
+    }
+    
+    // Сброс или инициализация
+    function setClients(value) {
+        let v = parseInt(value);
+        if (isNaN(v)) v = 25;
+        v = Math.min(400, Math.max(5, v));
+        currentClients = v;
+        clientsSlider.value = v;
+        clientsNumber.value = v;
+        clientsCountLabel.innerText = v;
+        updateAllFromClients();
+    }
+    
+    function setSegment(seg) {
+        currentSegment = seg;
+        // меняем визуал, но на доход не влияет (можно добавить множитель, но по заданию оставим игровым)
+        document.querySelectorAll('.seg-btn').forEach(btn => {
+            if (btn.getAttribute('data-seg') === seg) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        updateAllFromClients();
+    }
+    
+    // Социальное доказательство – кнопка "Поделиться"
+    function socialShare() {
+        let yearIncome = calculateYearlyIncome(currentClients);
+        let level = levelBadgeSpan.innerText;
+        let message = `🎉 Я заработал ${formatMoney(yearIncome)} с Card.Club за год! Уровень: ${level}. Присоединяйся к партнёрской программе → card.club/partner`;
+        navigator.clipboard.writeText(message).then(() => {
+            feedbackDiv.innerHTML = "📢 Скопировано в буфер! Отправь другу — покажи свой успех! + к карме 😎";
+            setTimeout(() => {
+                if (feedbackDiv.innerHTML.includes("Скопировано")) feedbackDiv.innerHTML = "🔥 Сила социального доказательства!";
+            }, 2000);
+        }).catch(() => {
+            alert("Нажми Ctrl+C, чтобы скопировать: " + message);
+        });
+    }
+    
+    // Инициализация событий
+    clientsSlider.addEventListener('input', (e) => setClients(e.target.value));
+    clientsNumber.addEventListener('input', (e) => setClients(e.target.value));
+    document.querySelectorAll('.seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => setSegment(btn.getAttribute('data-seg')));
+    });
+    questBtn.addEventListener('click', doQuest);
+    shareBtn.addEventListener('click', socialShare);
+    
+    // Инициализируем значениями по умолчанию (XP стартует с 0, но карты 0)
+    totalCardsIssued = 0;
+    totalXP = 0;
+    setClients(25);
+    setSegment('travel');
+    updateAllFromClients();
+    
+    // Небольшой стартовый бонус для привлечения
+    setTimeout(() => {
+        feedbackDiv.innerHTML = "🎁 Нажми на КВЕСТ и получи первые XP + случайный бонус! Стартуй прокачку!";
+    }, 800);
+</script>
+</body>
+</html>
