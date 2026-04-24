@@ -3,547 +3,512 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Card.Club — Игровой калькулятор дохода партнёра</title>
+    <title>Card.Club — Reality Simulator | Прокачай партнёрство</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
         }
         body {
             background: linear-gradient(145deg, #0a2f28 0%, #051e19 100%);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            padding: 24px 16px;
+            padding: 20px 16px;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .game-container {
-            max-width: 780px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 56px;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.4);
+            max-width: 860px;
+            width: 100%;
+            background: #0f1f1b;
+            border-radius: 48px;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.5);
             overflow: hidden;
-            transition: all 0.2s;
+            border: 1px solid #2d6a4f;
         }
-        .hero {
-            background: linear-gradient(135deg, #1a5f50, #0f3e33);
-            padding: 28px 24px 20px;
-            color: white;
-            text-align: center;
-        }
-        .hero h1 {
-            font-size: 1.9rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-        .hero p {
-            opacity: 0.85;
-            margin-top: 8px;
-            font-size: 0.9rem;
-        }
-        .level-badge {
-            background: rgba(255,215,0,0.2);
-            display: inline-flex;
+        /* HUD */
+        .hud {
+            background: #071e18;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            padding: 6px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-top: 12px;
-            backdrop-filter: blur(4px);
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid #2d6a4f;
         }
-        .xp-bar-container {
-            background: #2d5a4e;
-            border-radius: 40px;
-            margin-top: 18px;
-            padding: 3px;
+        .stats {
+            display: flex;
+            gap: 24px;
+            align-items: baseline;
+            flex-wrap: wrap;
         }
-        .xp-fill {
-            background: #ffd966;
-            width: 0%;
-            height: 12px;
+        .stat {
+            background: #00000055;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #ffde9c;
+        }
+        .step-indicator {
+            background: #1d3b33;
+            padding: 4px 12px;
             border-radius: 30px;
-            transition: width 0.4s ease;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .demo-badge {
+            background: #000000aa;
+            font-size: 0.65rem;
+            padding: 4px 10px;
+            border-radius: 40px;
+            color: #bbaa77;
         }
         .content {
             padding: 28px 24px;
         }
-        .segment-cards {
+        .screen {
+            display: none;
+            animation: fade 0.3s ease;
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .segment-buttons, .strategy-buttons {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 28px;
+            margin: 20px 0;
         }
-        .seg-btn {
-            flex: 1;
-            background: #f0f5f3;
+        .seg-btn, .strat-btn {
+            background: #1e3d35;
             border: none;
-            padding: 12px 8px;
+            padding: 12px 18px;
             border-radius: 60px;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-            color: #1a3e35;
-        }
-        .seg-btn.active {
-            background: #1a5f50;
-            color: white;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        }
-        .input-group {
-            margin-bottom: 28px;
-        }
-        .input-group label {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #1d3b33;
-        }
-        .range-wrapper {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        input[type="range"] {
             flex: 1;
-            height: 6px;
-            border-radius: 10px;
-            background: #dee8e4;
-            -webkit-appearance: none;
+            transition: 0.1s;
+            color: white;
         }
-        input[type="range"]:focus {
-            outline: none;
+        .seg-btn.active, .strat-btn.active {
+            background: #ffb347;
+            color: #1a2f2a;
+            box-shadow: 0 0 0 2px #ffd966;
         }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            background: #1a5f50;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .num-input {
-            width: 85px;
-            padding: 8px;
-            border-radius: 32px;
-            border: 1px solid #cbdcd6;
-            text-align: center;
-            font-weight: 600;
-            background: white;
-        }
-        .stats-panel {
-            background: #ecf7f2;
+        .coin-animation {
+            background: #ffd966;
+            color: #2c3e2b;
+            padding: 6px 12px;
             border-radius: 40px;
+            display: inline-block;
+            animation: bounce 0.4s ease;
+        }
+        @keyframes bounce {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.2);}
+            100% { transform: scale(1);}
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            background: #2e5a4b;
+            color: #ffecb3;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            z-index: 100;
+            box-shadow: 0 4px 12px black;
+            animation: fadeOut 3s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0);}
+            70% { opacity: 1;}
+            100% { opacity: 0; visibility: hidden;}
+        }
+        .skill-tree, .inventory {
+            background: #102b24;
+            border-radius: 32px;
             padding: 20px;
-            margin: 20px 0;
+            margin-top: 20px;
         }
-        .income-row {
+        .skill-row {
             display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .year-income {
-            font-size: 2.4rem;
-            font-weight: 800;
-            color: #1a6b5b;
-        }
-        .level-progress {
-            background: white;
-            border-radius: 36px;
-            padding: 14px 16px;
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             flex-wrap: wrap;
             gap: 12px;
+            margin-top: 12px;
         }
-        .level-name {
-            font-weight: 800;
-            background: #1a5f50;
-            display: inline-block;
-            padding: 6px 18px;
-            border-radius: 40px;
-            color: white;
-            font-size: 0.8rem;
-        }
-        .badges {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 20px 0 10px;
-        }
-        .badge {
-            background: #fef6e0;
-            border-radius: 60px;
-            padding: 6px 16px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #b16300;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .social-share {
-            background: white;
-            border-radius: 32px;
-            padding: 16px;
-            border: 1px solid #d0e4dc;
-            margin: 20px 0;
-            text-align: center;
-        }
-        .quest-btn {
-            background: #ffcd4a;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 60px;
-            font-weight: 800;
-            font-size: 1rem;
+        .skill-card {
+            background: #1f3f36;
+            flex: 1;
+            padding: 12px;
+            border-radius: 24px;
             cursor: pointer;
-            width: 100%;
-            font-family: inherit;
-            transition: 0.15s;
-            margin-top: 8px;
+            text-align: center;
+            transition: 0.1s;
         }
-        .quest-btn:active {
-            transform: scale(0.97);
+        .skill-card.unlocked {
+            background: #ffb347;
+            color: #1e2a25;
+        }
+        .inventory-slot {
+            background: #00000066;
+            border-radius: 24px;
+            padding: 8px;
+            display: inline-block;
+            width: 100px;
+            text-align: center;
+            margin: 5px;
+        }
+        button {
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: #ffb347;
+            border: none;
+            border-radius: 60px;
+            padding: 12px 24px;
+            font-weight: 800;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .money {
+            font-weight: 800;
+            color: #ffd966;
         }
         .feedback {
-            margin-top: 18px;
-            font-size: 0.85rem;
-            background: #eef3f1;
-            border-radius: 24px;
-            padding: 12px;
-            text-align: center;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #afc9bf;
         }
-        .footer-note {
-            font-size: 0.7rem;
-            text-align: center;
-            margin-top: 28px;
-            color: #6f8f84;
-        }
-        @media (max-width: 550px) {
-            .content {
-                padding: 20px;
-            }
-            .year-income {
-                font-size: 1.8rem;
-            }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <div class="hero">
-        <h1>🎮 ПРОКАЧАЙ ПАРТНЁРСТВО</h1>
-        <p>Выпускай карты → получай опыт → становись легендой</p>
-        <div class="level-badge">
-            🧙‍♂️ Ваш уровень: <span id="levelNameDisplay">Бронза</span>
+<div class="game-container" id="gameRoot">
+    <div class="hud">
+        <div class="stats">
+            <div class="stat">💰 <span id="moneyDisplay">0</span> $</div>
+            <div class="stat">⭐ XP: <span id="xpDisplay">0</span></div>
+            <div class="stat">📊 Lv. <span id="levelDisplay">1</span></div>
         </div>
-        <div class="xp-bar-container">
-            <div class="xp-fill" id="xpFillBar" style="width:0%"></div>
-        </div>
+        <div class="step-indicator" id="stepIndicator">Шаг 1/5</div>
+        <div class="demo-badge">⚡ демо-симулятор</div>
     </div>
-
-    <div class="content">
-        <!-- Выбор сегмента бизнеса -->
-        <div class="segment-cards">
-            <button class="seg-btn" data-seg="travel">🌍 Турагентство</button>
-            <button class="seg-btn" data-seg="visa">🛂 Визовый центр</button>
-            <button class="seg-btn" data-seg="realty">🏡 Недвижимость</button>
+    <div class="content" id="screenContainer">
+        <!-- экран 0: Intro -->
+        <div class="screen active" id="screen0">
+            <h2 style="color:#ffde9c;">🎮 REALITY SIMULATOR</h2>
+            <p style="margin: 15px 0;">Прокачай своё партнёрство с Card.Club за 2 минуты.<br>Сделай выбор — увидишь доход.</p>
+            <button class="btn-primary" id="startBtn">Начать симуляцию →</button>
         </div>
-
-        <!-- Количество клиентов / карт -->
-        <div class="input-group">
-            <label>👥 Новых клиентов в месяц <span id="clientsCountLabel">25</span></label>
-            <div class="range-wrapper">
-                <input type="range" id="clientsSlider" min="5" max="400" value="25" step="1">
-                <input type="number" id="clientsNumber" class="num-input" value="25" step="5" min="5" max="400">
+        <!-- экран 1: выбор сегмента -->
+        <div class="screen" id="screen1">
+            <h3>🏢 Выберите ваш бизнес</h3>
+            <div class="segment-buttons">
+                <button class="seg-btn" data-seg="travel">🌍 Турагентство</button>
+                <button class="seg-btn" data-seg="visa">🛂 Визовый центр</button>
+                <button class="seg-btn" data-seg="realty">🏡 Недвижимость</button>
+                <button class="seg-btn" data-seg="blogger">📱 Блогер / Инфлюенсер</button>
             </div>
+            <button class="btn-primary nextBtn" disabled id="segNext">Далее</button>
         </div>
-
-        <!-- Статистика дохода + XP -->
-        <div class="stats-panel">
-            <div class="income-row">
-                <span>💰 ГОДОВОЙ ДОХОД</span>
-                <span class="year-income" id="yearIncomeDisplay">0 ₽</span>
+        <!-- экран 2: первая карта -->
+        <div class="screen" id="screen2">
+            <h3>💳 Первая карта</h3>
+            <p>Выпустите карту самостоятельно (себе или близкому). <br>💡 Бонус: 50% комиссии за первый выпуск!</p>
+            <button id="issueCardBtn" class="btn-primary">➕ Выпустить карту (+$17.5, +30 XP)</button>
+            <div class="feedback" id="cardFeedback"></div>
+            <button class="btn-primary nextBtn" id="cardNext" disabled style="background:#446b5e;">Далее</button>
+        </div>
+        <!-- экран 3: стратегия -->
+        <div class="screen" id="screen3">
+            <h3>⚔️ Выберите стратегию продвижения</h3>
+            <div class="strategy-buttons">
+                <button class="strat-btn" data-strategy="active">🚀 Активные продажи (+80 XP, x1.3 доход)</button>
+                <button class="strat-btn" data-strategy="word">🗣️ Сарафан (+40 XP, x1.1 доход)</button>
+                <button class="strat-btn" data-strategy="b2b">🤝 Партнёрства (+60 XP, x1.2 доход)</button>
+                <button class="strat-btn" data-strategy="passive">💤 Пассив (+20 XP, x0.9 доход)</button>
             </div>
-            <div style="font-size:0.85rem; color:#2d6a4f;">💳 В среднем 3.5 карт на клиента + перевыпуски</div>
-            <div class="level-progress">
-                <span>🎯 <span id="currentXP">0</span> / <span id="nextXPNeeded">100</span> XP</span>
-                <span class="level-name" id="levelBadge">Новичок</span>
+            <div class="feedback" id="strategyFeedback"></div>
+            <button class="btn-primary nextBtn" id="strategyNext" disabled>Далее</button>
+        </div>
+        <!-- экран 4: соц. лента + лидерборд имитация -->
+        <div class="screen" id="screen4">
+            <h3>📰 Что происходит у других партнёров</h3>
+            <div id="socialFeed" style="background:#102b24; border-radius: 24px; padding: 12px; margin: 15px 0;">
+                🔥 Анна (турагент) заработала 350$ за неделю<br>
+                🚀 Макс (визовый центр) +22 карты → +385$<br>
+                🎯 Елена (недвижимость) получила бонус 1200$
             </div>
+            <div class="feedback" id="socialFeedback"></div>
+            <button class="btn-primary nextBtn" id="socialNext">Продолжить</button>
         </div>
-
-        <!-- Достижения (бейджи) -->
-        <div class="badges" id="badgesArea">
-            <div class="badge">🟢 Первый выпуск (0/1)</div>
-            <div class="badge">⭐ 10 карт (0/10)</div>
-            <div class="badge">🔥 50 карт (0/50)</div>
-            <div class="badge">🏆 100 карт (0/100)</div>
-        </div>
-
-        <!-- Социальное доказательство и прокачка -->
-        <div class="social-share" id="socialBlock">
-            🏆 <strong>Стань героем</strong> — поделись результатом, вдохнови коллег!
-            <button id="shareFakeBtn" style="background:none; border:1px solid #1a5f50; border-radius:40px; padding:6px 12px; margin-top:8px; display:inline-block;">📢 Похвастаться подвигом</button>
-        </div>
-
-        <!-- Квест-кнопка (случайный бонус) -->
-        <button class="quest-btn" id="questBtn">✨ КВЕСТ: Приведи первого клиента ✨</button>
-        <div class="feedback" id="feedbackMessage">
-            💡 Нажми на квест — получи +10 XP и шанс на супербонус!
-        </div>
-        <div class="footer-note">
-            ⚡ Игровая механика по принципам Octalysis: прогресс, соц. влияние, неожиданность, чувство достижения.
+        <!-- экран 5: финал + дерево навыков, инвентарь, CTA -->
+        <div class="screen" id="screen5">
+            <h3>🏆 РАСЧЁТ ДОХОДА</h3>
+            <div id="finalNumbers" style="background:#00000055; border-radius: 28px; padding: 16px; margin: 15px 0;">
+                <!-- динамически -->
+            </div>
+            <div class="skill-tree" id="skillTreeBlock">
+                <h4>🌿 Дерево навыков (3 очка)</h4>
+                <div class="skill-row" id="skillsContainer"></div>
+                <div class="feedback" id="skillFeedback"></div>
+            </div>
+            <div class="inventory" id="inventoryBlock">
+                <h4>🎒 Снаряжение</h4>
+                <div id="gearSlots"></div>
+            </div>
+            <button id="ctaButton" class="btn-primary">✨ СТАТЬ РЕАЛЬНОСТЬЮ ✨</button>
+            <div class="feedback">* Виртуальные цифры превращаются в живые деньги после регистрации в партнёрской программе.</div>
         </div>
     </div>
 </div>
 
 <script>
-    // ---------- Геймификационный движок ----------
-    // Базовые параметры
-    const COMMISSION_PER_CARD_RUB = 1250;   // 50% от средней цены выпуска
-    const CARDS_PER_CLIENT = 3.5;           // в среднем 3-5 карт на клиента (мультикарточность)
-    const RENEWAL_FACTOR = 0.9;              // ежегодные перевыпуски (почти все карты перевыпускаются)
-    
-    // XP progression: каждый уровень требует всё больше XP
-    const levelThresholds = [
-        { name: "🟢 Новичок", minXP: 0, badge: "🌱 Первые шаги" },
-        { name: "🥉 Бронза", minXP: 120, badge: "🥉 Бронзовый партнёр" },
-        { name: "🥈 Серебро", minXP: 320, badge: "🥈 Серебряный агент" },
-        { name: "🥇 Золото", minXP: 650, badge: "🥇 Золотой эксперт" },
-        { name: "💎 Платина", minXP: 1100, badge: "💎 Мастер партнёрства" },
-        { name: "👑 Гуру", minXP: 1800, badge: "👑 Легенда Card.Club" }
-    ];
-    
-    // Достижения
-    const achievements = [
-        { id: "first", label: "🟢 Первый выпуск (0/1)", required: 1, earned: false },
-        { id: "ten", label: "⭐ 10 карт (0/10)", required: 10, earned: false },
-        { id: "fifty", label: "🔥 50 карт (0/50)", required: 50, earned: false },
-        { id: "hundred", label: "🏆 100 карт (0/100)", required: 100, earned: false }
-    ];
-    
-    // Глобальные переменные
-    let currentClients = 25;
-    let currentSegment = "travel";   // travel, visa, realty (пока не влияет на комиссию, только на эмоции)
-    let totalXP = 0;
-    let totalCardsIssued = 0;         // совокупное количество выпущенных карт (виртуальных за всё время)
-    let unlockedAchievements = [];
-    
-    // DOM элементы
-    const clientsSlider = document.getElementById('clientsSlider');
-    const clientsNumber = document.getElementById('clientsNumber');
-    const clientsCountLabel = document.getElementById('clientsCountLabel');
-    const yearIncomeDisplay = document.getElementById('yearIncomeDisplay');
-    const currentXPSpan = document.getElementById('currentXP');
-    const nextXPNeededSpan = document.getElementById('nextXPNeeded');
-    const levelBadgeSpan = document.getElementById('levelBadge');
-    const levelNameDisplay = document.getElementById('levelNameDisplay');
-    const xpFillBar = document.getElementById('xpFillBar');
-    const badgesArea = document.getElementById('badgesArea');
-    const questBtn = document.getElementById('questBtn');
-    const feedbackDiv = document.getElementById('feedbackMessage');
-    const shareBtn = document.getElementById('shareFakeBtn');
-    
-    // Вспомогательные функции
-    function formatMoney(val) {
-        return val.toLocaleString('ru-RU') + ' ₽';
-    }
-    
-    // Расчёт количества выпущенных карт за год (на основе новых клиентов)
-    function calculateTotalCardsIssued(clients) {
-        let directIssues = clients * CARDS_PER_CLIENT;
-        let renewals = directIssues * RENEWAL_FACTOR;
-        return Math.floor(directIssues + renewals);
-    }
-    
-    // Доход за год
-    function calculateYearlyIncome(clients) {
-        let totalCards = calculateTotalCardsIssued(clients);
-        return totalCards * COMMISSION_PER_CARD_RUB;
-    }
-    
-    // Обновление XP на основе общего числа выпущенных карт (накопленных)
-    function updateXPAndLevel() {
-        // XP начисляется 1 XP за каждую выпущенную карту (история)
-        let calculatedXP = totalCardsIssued;
-        totalXP = calculatedXP;
-        // Найти текущий уровень
-        let currentLevel = levelThresholds[0];
-        let nextThreshold = 100;
-        for (let i = 0; i < levelThresholds.length; i++) {
-            if (totalXP >= levelThresholds[i].minXP) {
-                currentLevel = levelThresholds[i];
-                if (i+1 < levelThresholds.length) nextThreshold = levelThresholds[i+1].minXP;
-                else nextThreshold = levelThresholds[i].minXP + 200;
-            }
+    // ---- Игровое состояние ----
+    let state = {
+        segment: null,          // travel, visa, realty, blogger
+        firstCardIssued: false,
+        strategy: null,         // active, word, b2b, passive
+        money: 0,
+        xp: 0,
+        level: 1,
+        step: 0,               // 0 intro, 1 segment, 2 card, 3 strategy, 4 social, 5 final
+        // доп множители
+        strategyMultiplier: 1,
+        strategyXPGain: 0,
+        // дерево навыков
+        skillPoints: 3,
+        skills: {
+            conversion: false,
+            referral: false,
+            loyalty: false,
+            speed: false
+        },
+        // снаряжение (открывается авто)
+        gear: {
+            firstCard: false,
+            socialBoost: false,
+            levelUp: false
         }
-        let xpForNext = nextThreshold - totalXP;
-        if (xpForNext < 0) xpForNext = 0;
-        let xpInCurrent = totalXP - currentLevel.minXP;
-        let currentMax = nextThreshold - currentLevel.minXP;
-        let progressPercent = (xpInCurrent / currentMax) * 100;
-        if (currentMax <= 0) progressPercent = 100;
-        progressPercent = Math.min(100, Math.max(0, progressPercent));
-        
-        levelBadgeSpan.innerText = currentLevel.name;
-        levelNameDisplay.innerText = currentLevel.name;
-        currentXPSpan.innerText = totalXP;
-        nextXPNeededSpan.innerText = xpForNext;
-        xpFillBar.style.width = progressPercent + '%';
-        
-        // Обновить достижения (на основе totalCardsIssued)
-        updateAchievementsUI();
+    };
+
+    // константы для дохода (базовый годовой доход в зависимости от сегмента)
+    function getBaseIncomePerYear(segment) {
+        if (segment === 'travel') return 12400;
+        if (segment === 'visa') return 9800;
+        if (segment === 'realty') return 18600;
+        if (segment === 'blogger') return 7500;
+        return 10000;
     }
-    
-    function updateAchievementsUI() {
-        achievements.forEach(ach => {
-            let earnedNow = (totalCardsIssued >= ach.required);
-            if (earnedNow && !ach.earned) {
-                ach.earned = true;
-                feedbackDiv.innerHTML = `🎉 Достижение получено: ${ach.label} 🎉<br> +50 XP бонус!`;
-                totalCardsIssued += 50;   // награда за новое достижение (дополнительный опыт)
-                updateAllFromClients();    // пересчитать всё
-                setTimeout(() => {
-                    if (feedbackDiv.innerHTML.includes("Достижение получено")) {
-                        feedbackDiv.innerHTML = "✨ Отлично! Прокачка продолжается ✨";
-                    }
-                }, 2500);
-            }
-        });
-        
-        // Перерисовка бейджей
-        badgesArea.innerHTML = achievements.map(ach => {
-            let status = ach.earned ? "✅ " : "🔘 ";
-            let countShow = Math.min(totalCardsIssued, ach.required);
-            let label = status + ach.label.replace(/\(.*\)/, `(${Math.min(totalCardsIssued, ach.required)}/${ach.required})`);
-            let style = ach.earned ? 'background:#d4f0e4; color:#1a5f50;' : '';
-            return `<div class="badge" style="${style}">${label}</div>`;
-        }).join('');
+
+    // XP для следующего уровня
+    function xpForNextLevel(level) {
+        return 100 + (level-1)*50;
     }
-    
-    // Обновление всех показателей от количества клиентов за месяц
-    function updateAllFromClients() {
-        let clients = currentClients;
-        clientsCountLabel.innerText = clients;
-        let yearlyIncome = calculateYearlyIncome(clients);
-        let cardsIssuedThisYear = calculateTotalCardsIssued(clients);
-        // Накопленные карты = предыдущее значение? Важно: чтобы XP росло не только за годовой прогноз, а за суммарную активность.
-        // Используем текущее значение totalCardsIssued как базу накопленных выпусков, но при изменении ползунка показываем "потенциальный доход",
-        // а XP пусть растет от прогресса. Но для геймификации лучше начислять XP за "совершённые действия" - имитируем нажатие кнопки квеста.
-        // Однако, для ощущения прокачки при подборе клиентов дадим "виртуальный XP" за каждый дополнительный выпуск.
-        // Сделаем так: при изменении ползунка будет пересчитываться "прогнозируемый общий выпуск за год", но накопленный XP (totalCardsIssued) может изменяться
-        // только через квест. Чтобы ползунок давал ощущение роста, добавим механизм "симуляции опыта": при достижении новых рекордов начисляется бонус.
-        // Но правильнее: XP начисляется за "завершённые квесты". При изменении слайдера просто показываем доход, но пользователь сам нажимает "квест" для прокачки.
-        // Однако для динамики создадим систему: при изменении числа клиентов выше 10,20,50 и тд выдаём маленькие бонусы один раз.
-        // Реализуем разовое начисление XP за достижение вех в слайдере (чтобы игра была активной).
-        yearIncomeDisplay.innerText = formatMoney(yearlyIncome);
-        // Сохраняем в data-атрибуты для квеста
-        document.getElementById('clientsSlider').dataset.lastClients = clients;
-        
-        // Дополнительно: если в ручную не меняли XP, оставляем накопленное.
-        updateXPAndLevel();
-    }
-    
-    // Функция начисления XP за квест + случайный бонус
-    function doQuest() {
-        let addedXP = 10; // базовый опыт
-        let randomBonus = Math.random();
-        let bonusText = "";
-        let extraCards = 0;
-        if (randomBonus < 0.2) {
-            addedXP += 40;
-            bonusText = "🔥 СУПЕРБОНУС! +40 XP 🔥";
-            extraCards = 35;
-        } else if (randomBonus < 0.5) {
-            addedXP += 15;
-            bonusText = "✨ Класс! +15 XP ✨";
-            extraCards = 12;
-        } else {
-            bonusText = "👍 +10 XP";
-            extraCards = 8;
+
+    function updateLevel() {
+        let needed = xpForNextLevel(state.level);
+        while (state.xp >= needed) {
+            state.xp -= needed;
+            state.level++;
+            needed = xpForNextLevel(state.level);
+            showToast(`✨ Повышение уровня ${state.level}! + бонус 50$ ✨`);
+            state.money += 50;
         }
-        // За выполнение квеста увеличиваем общее количество выпущенных карт (симулируем новых клиентов)
-        totalCardsIssued += extraCards;
-        totalXP += addedXP;
-        updateXPAndLevel();
-        feedbackDiv.innerHTML = `🏆 Квест выполнен! ${bonusText}<br> Совершено ${extraCards} виртуальных выпусков. Итоговый выпуск карт: ${totalCardsIssued}`;
-        // Также обновляем доход при текущем потоке не меняем, даём ощущение прогресса накоплений.
-        updateAllFromClients();
-        // показываем обновлённые достижения
-        setTimeout(() => {
-            if (feedbackDiv.innerHTML.includes("Квест выполнен")) {
-                feedbackDiv.innerHTML = "💪 Новые квесты будут скоро! Продолжай прокачку.";
-            }
-        }, 3200);
+        document.getElementById('xpDisplay').innerText = state.xp;
+        document.getElementById('levelDisplay').innerText = state.level;
+        document.getElementById('moneyDisplay').innerText = Math.floor(state.money);
     }
-    
-    // Сброс или инициализация
-    function setClients(value) {
-        let v = parseInt(value);
-        if (isNaN(v)) v = 25;
-        v = Math.min(400, Math.max(5, v));
-        currentClients = v;
-        clientsSlider.value = v;
-        clientsNumber.value = v;
-        clientsCountLabel.innerText = v;
-        updateAllFromClients();
+
+    function addMoney(amount) {
+        state.money += amount;
+        document.getElementById('moneyDisplay').innerText = Math.floor(state.money);
+        // анимация
+        const el = document.getElementById('moneyDisplay');
+        el.classList.add('coin-animation');
+        setTimeout(() => el.classList.remove('coin-animation'), 400);
     }
-    
-    function setSegment(seg) {
-        currentSegment = seg;
-        // меняем визуал, но на доход не влияет (можно добавить множитель, но по заданию оставим игровым)
-        document.querySelectorAll('.seg-btn').forEach(btn => {
-            if (btn.getAttribute('data-seg') === seg) btn.classList.add('active');
-            else btn.classList.remove('active');
+
+    function addXP(amount) {
+        state.xp += amount;
+        updateLevel();
+        showToast(`+${amount} XP`);
+    }
+
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // показать шаг
+    function showStep(step) {
+        for(let i=0;i<=5;i++) {
+            let el = document.getElementById(`screen${i}`);
+            if(el) el.classList.remove('active');
+        }
+        document.getElementById(`screen${step}`).classList.add('active');
+        state.step = step;
+        const stepNames = ['Вступление', 'Бизнес', 'Первая карта', 'Стратегия', 'Обзор', 'Финал'];
+        document.getElementById('stepIndicator').innerText = `Шаг ${step}/5 — ${stepNames[step] || ''}`;
+        if(step === 5) renderFinalScreen();
+    }
+
+    function renderFinalScreen() {
+        // расчёт дохода
+        let base = getBaseIncomePerYear(state.segment);
+        let multiplier = state.strategyMultiplier;
+        // бонусы от навыков
+        if(state.skills.conversion) multiplier += 0.1;
+        if(state.skills.referral) multiplier += 0.08;
+        if(state.skills.loyalty) multiplier += 0.07;
+        if(state.skills.speed) multiplier += 0.05;
+        let finalIncome = Math.floor(base * multiplier);
+        // расход от снаряжения
+        if(state.gear.firstCard) finalIncome += 350;
+        if(state.gear.socialBoost) finalIncome += 220;
+        if(state.gear.levelUp && state.level >= 3) finalIncome += 500;
+        
+        document.getElementById('finalNumbers').innerHTML = `
+            <div class="flex-between"><span>Ваш бизнес:</span><strong>${state.segment}</strong></div>
+            <div class="flex-between"><span>Стратегия:</span><strong>${state.strategy}</strong></div>
+            <div class="flex-between"><span>Уровень партнёра:</span><strong>${state.level}</strong></div>
+            <div class="flex-between"><span>Прогноз дохода за год:</span><strong class="money">${finalIncome}$</strong></div>
+            <div class="flex-between"><span>Ежемесячно:</span><strong>${Math.floor(finalIncome/12)}$</strong></div>
+        `;
+        // отрисовка дерева навыков
+        let skillsHtml = '';
+        const skillNames = { conversion: '📈 Конверсия +10%', referral: '👥 Рефералы +8%', loyalty: '🔄 Лояльность +7%', speed: '⚡ Скорость +5%' };
+        for(let [id, label] of Object.entries(skillNames)) {
+            let unlocked = state.skills[id];
+            skillsHtml += `<div class="skill-card ${unlocked ? 'unlocked' : ''}" data-skill="${id}">
+                            ${label}<br>${unlocked ? '✅ Активен' : '🔒 За 1 очко'}
+                           </div>`;
+        }
+        document.getElementById('skillsContainer').innerHTML = skillsHtml;
+        document.querySelectorAll('.skill-card').forEach(el => {
+            el.addEventListener('click', () => {
+                let skillId = el.dataset.skill;
+                if(state.skillPoints > 0 && !state.skills[skillId]) {
+                    state.skills[skillId] = true;
+                    state.skillPoints--;
+                    document.getElementById('skillFeedback').innerHTML = `🎉 Навык «${skillNames[skillId]}» изучен! Осталось очков: ${state.skillPoints}`;
+                    renderFinalScreen();  // перерисовка с обновлением дохода
+                } else if(state.skills[skillId]) {
+                    document.getElementById('skillFeedback').innerHTML = 'Навык уже изучен.';
+                } else {
+                    document.getElementById('skillFeedback').innerHTML = 'Нет очков навыков (получите за выполнение квестов).';
+                }
+            });
         });
-        updateAllFromClients();
+        // инвентарь (снаряжение)
+        let gearHtml = '';
+        if(state.gear.firstCard) gearHtml += `<div class="inventory-slot">💳 Карта «Старт» +350$</div>`;
+        if(state.gear.socialBoost) gearHtml += `<div class="inventory-slot">📣 Социальный бустер +220$</div>`;
+        if(state.gear.levelUp) gearHtml += `<div class="inventory-slot">🏅 Знак «Уровень ${state.level}» +500$</div>`;
+        if(gearHtml === '') gearHtml = 'Нет снаряжения. Выполняйте действия — открывайте слоты!';
+        document.getElementById('gearSlots').innerHTML = gearHtml;
     }
+
+    // обработчики
+    document.getElementById('startBtn').addEventListener('click', () => showStep(1));
     
-    // Социальное доказательство – кнопка "Поделиться"
-    function socialShare() {
-        let yearIncome = calculateYearlyIncome(currentClients);
-        let level = levelBadgeSpan.innerText;
-        let message = `🎉 Я заработал ${formatMoney(yearIncome)} с Card.Club за год! Уровень: ${level}. Присоединяйся к партнёрской программе → card.club/partner`;
-        navigator.clipboard.writeText(message).then(() => {
-            feedbackDiv.innerHTML = "📢 Скопировано в буфер! Отправь другу — покажи свой успех! + к карме 😎";
-            setTimeout(() => {
-                if (feedbackDiv.innerHTML.includes("Скопировано")) feedbackDiv.innerHTML = "🔥 Сила социального доказательства!";
-            }, 2000);
-        }).catch(() => {
-            alert("Нажми Ctrl+C, чтобы скопировать: " + message);
+    // выбор сегмента
+    let segBtns = document.querySelectorAll('.seg-btn');
+    let segNext = document.getElementById('segNext');
+    segBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            segBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.segment = btn.dataset.seg;
+            segNext.disabled = false;
         });
-    }
-    
-    // Инициализация событий
-    clientsSlider.addEventListener('input', (e) => setClients(e.target.value));
-    clientsNumber.addEventListener('input', (e) => setClients(e.target.value));
-    document.querySelectorAll('.seg-btn').forEach(btn => {
-        btn.addEventListener('click', () => setSegment(btn.getAttribute('data-seg')));
     });
-    questBtn.addEventListener('click', doQuest);
-    shareBtn.addEventListener('click', socialShare);
+    segNext.addEventListener('click', () => showStep(2));
     
-    // Инициализируем значениями по умолчанию (XP стартует с 0, но карты 0)
-    totalCardsIssued = 0;
-    totalXP = 0;
-    setClients(25);
-    setSegment('travel');
-    updateAllFromClients();
+    // первая карта
+    const issueBtn = document.getElementById('issueCardBtn');
+    const cardNextBtn = document.getElementById('cardNext');
+    issueBtn.addEventListener('click', () => {
+        if(!state.firstCardIssued) {
+            addMoney(17.5);
+            addXP(30);
+            state.firstCardIssued = true;
+            state.gear.firstCard = true;   // получаем снаряжение
+            document.getElementById('cardFeedback').innerHTML = '✅ Карта выпущена! +17.5$, +30 XP. Вы получаете предмет "Карта Старт".';
+            issueBtn.disabled = true;
+            cardNextBtn.disabled = false;
+        }
+    });
     
-    // Небольшой стартовый бонус для привлечения
-    setTimeout(() => {
-        feedbackDiv.innerHTML = "🎁 Нажми на КВЕСТ и получи первые XP + случайный бонус! Стартуй прокачку!";
-    }, 800);
+    // стратегия
+    let stratBtns = document.querySelectorAll('.strat-btn');
+    let stratNext = document.getElementById('strategyNext');
+    stratBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            stratBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            let strat = btn.dataset.strategy;
+            state.strategy = strat;
+            if(strat === 'active') { state.strategyMultiplier = 1.3; state.strategyXPGain = 80; }
+            else if(strat === 'word') { state.strategyMultiplier = 1.1; state.strategyXPGain = 40; }
+            else if(strat === 'b2b') { state.strategyMultiplier = 1.2; state.strategyXPGain = 60; }
+            else { state.strategyMultiplier = 0.9; state.strategyXPGain = 20; }
+            document.getElementById('strategyFeedback').innerHTML = `Выбрано: ${btn.innerText}. +${state.strategyXPGain} XP при переходе.`;
+            stratNext.disabled = false;
+        });
+    });
+    stratNext.addEventListener('click', () => {
+        addXP(state.strategyXPGain);
+        showStep(4);
+    });
+    // социальная лента
+    document.getElementById('socialNext').addEventListener('click', () => {
+        // открыть достижение социальное
+        state.gear.socialBoost = true;
+        showToast('📢 Вы получили «Социальный бустер» за участие!');
+        showStep(5);
+    });
+    // CTA кнопка
+    document.getElementById('ctaButton').addEventListener('click', () => {
+        alert('🔥 Свяжитесь с Владимиром: Telegram @Vladi_andr для реального партнёрства! Виртуальные деньги станут живыми.');
+    });
+    
+    // дополнительные фишки: при получении уровня открывается предмет
+    function checkLevelGear() {
+        if(state.level >= 3 && !state.gear.levelUp) {
+            state.gear.levelUp = true;
+            showToast('🏅 Новое снаряжение: Знак «Уровень 3»!');
+            if(state.step === 5) renderFinalScreen();
+        }
+    }
+    // переопределим updateLevel для триггера
+    const origUpdate = updateLevel;
+    window.updateLevel = function() {
+        origUpdate();
+        checkLevelGear();
+    };
+    updateLevel = window.updateLevel;
+    
+    // инициализация
+    showStep(0);
 </script>
 </body>
 </html>
