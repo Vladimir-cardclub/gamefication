@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Card.Club Partner Journey v4.0 — Монетизируйте базу</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0B0E14, #030507);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #EFF3F5;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* премиум стекло */
+        .sim-card {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(18, 24, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 56px;
+            border: 1px solid rgba(255, 215, 150, 0.25);
+            box-shadow: 0 30px 45px -15px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,215,150,0.05) inset;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* HUD */
+        .hud {
+            background: rgba(8, 12, 16, 0.8);
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255,200,100,0.3);
+        }
+        .stats {
+            display: flex;
+            gap: 28px;
+        }
+        .stat {
+            background: #10181e;
+            padding: 5px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: -0.01em;
+            box-shadow: inset 0 1px 0 rgba(255,255,240,0.05), 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .rank-progress {
+            background: #00000044;
+            border-radius: 60px;
+            padding: 5px 15px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .content {
+            padding: 32px 32px 44px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeSlide 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #FFF8E7, #FFD966);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        h1 { font-size: 2.1rem; margin-bottom: 12px; }
+        h2 { font-size: 1.8rem; margin-bottom: 12px; }
+        h3 { font-size: 1.3rem; margin-bottom: 8px; }
+
+        .desc {
+            color: #B9CFD4;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        .grid-2 {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+        .card-choice {
+            flex: 1;
+            background: #0F181F;
+            border-radius: 32px;
+            padding: 24px;
+            border: 1px solid #2A3840;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .card-choice:hover { border-color: #FFD966; background: #121E26; transform: translateY(-2px);}
+        .card-choice.active { border-color: #FFB347; background: #14262E; box-shadow: 0 0 0 1px #FFB347;}
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 10px;
+            background: #2A3A40;
+            -webkit-appearance: none;
+        }
+        input[type="range"]:focus { outline: none; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #FFD966;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 6px #FFB347;
+        }
+
+        button {
+            background: #FFB347;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.1s linear;
+            font-family: inherit;
+            color: #111;
+            box-shadow: 0 4px 12px rgba(255,180,70,0.2);
+        }
+        button.secondary {
+            background: transparent;
+            border: 1px solid #FFD966;
+            color: #FFE3A3;
+            box-shadow: none;
+        }
+        button:active { transform: scale(0.97); }
+
+        .reality-break {
+            background: rgba(0,0,0,0.5);
+            border-left: 5px solid #FF6B4A;
+            border-radius: 28px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .income-big {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: #FFD966;
+        }
+        .badge-achieve {
+            background: #16262B;
+            border-radius: 100px;
+            padding: 8px 20px;
+            display: inline-block;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+        }
+        .live-feed {
+            background: #0B1115;
+            border-radius: 24px;
+            padding: 12px 18px;
+            margin: 20px 0;
+            font-size: 0.85rem;
+            border: 1px solid #2F4048;
+        }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .telegram-cta {
+            background: #1F2C33;
+            border-radius: 36px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 28px;
+        }
+        @media (max-width: 680px) {
+            .content { padding: 20px; }
+            .income-big { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="sim-card" id="app">
+    <div class="hud">
+        <div class="stats">
+            <div class="stat">🎖️ Ранг: <span id="rankLabel">STARTER</span></div>
+            <div class="stat">⭐ XP: <span id="xpValue">0</span></div>
+            <div class="stat">💰 Бонус: <span id="bonusValue">0</span>$</div>
+        </div>
+        <div class="rank-progress">🔓 След.: <span id="nextRankLabel">PRO</span></div>
+    </div>
+    <div class="content" id="screenRoot"></div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // CORE STATE & MODULES (чистая архитектура)
+    // --------------------------------------------------------------
+    const State = {
+        step: 0,                 // 0..5 экраны
+        segment: 'travel',      // travel, visa, realty, online
+        baseClients: 1500,      // база контактов
+        cardPrice: 35,          // $20-$200
+        strategy: 'premium',
+        selfIssued: false,      // выпустил ли себе
+        promoReceived: false,    // получил ли промо-материалы
+        campaignsDone: 0,        // 0..2 (касания после материалов)
+        totalXP: 0,
+        totalBonus: 0,
+        promiseText: '',
+        // производные метрики
+        takeRate: 0.08,
+        ltvFactor: 1.15,
+        final3mIncome: 0,
+        final12mIncome: 0,
+        finalLostPerDay: 0
+    };
+
+    // ранги, XP пороги
+    const rankThresholds = [
+        { name: 'STARTER', xp: 0, next: 'PRO' },
+        { name: 'PRO', xp: 180, next: 'EXPERT' },
+        { name: 'EXPERT', xp: 450, next: 'ELITE' },
+        { name: 'ELITE', xp: 850, next: '∞' }
+    ];
+
+    // методы пересчёта дохода (строго 50% от выпуска)
+    function updateEconomy() {
+        const commissionPerCard = State.cardPrice * 0.5;          // 17.5$ при $35
+        let baseTake = 0.08 + (State.campaignsDone * 0.04);      // 8%,12%,16%
+        if(State.promoReceived) baseTake += 0.02;                // буст за материалы
+        let conversion = 0.15; // 15% конверсия базы в заинтересованных
+        let potentialBuyers = Math.floor(State.baseClients * conversion);
+        let newCardsPerCampaign = Math.floor(potentialBuyers * Math.min(0.25, baseTake));
+        let threeMonthsCards = newCardsPerCampaign * (State.campaignsDone + 1);
+        let threeMonthsIncome = threeMonthsCards * commissionPerCard;
+        let ltv = State.ltvFactor;
+        let twelveMonthsIncome = threeMonthsIncome * 4 * ltv;
+        let lostPerDay = twelveMonthsIncome / 365;
+        State.final3mIncome = threeMonthsIncome;
+        State.final12mIncome = twelveMonthsIncome;
+        State.finalLostPerDay = lostPerDay;
+    }
+
+    function recalcXPAndRank() {
+        let xp = State.totalXP;
+        let currentRank = rankThresholds[0];
+        for(let i=rankThresholds.length-1; i>=0; i--) {
+            if(xp >= rankThresholds[i].xp) { currentRank = rankThresholds[i]; break; }
+        }
+        const nextRankObj = rankThresholds.find(r => r.name === currentRank.next) || rankThresholds[rankThresholds.length-1];
+        document.getElementById('rankLabel').innerText = currentRank.name;
+        document.getElementById('nextRankLabel').innerText = currentRank.next;
+        document.getElementById('xpValue').innerText = xp;
+        document.getElementById('bonusValue').innerText = Math.floor(State.totalBonus);
+    }
+
+    function addXP(amount, bonusMoney=0) {
+        State.totalXP += amount;
+        State.totalBonus += bonusMoney;
+        recalcXPAndRank();
+        updateEconomy();
+    }
+
+    // ----------------------------------------------
+    // Роутер (рендер экранов по State.step)
+    // ----------------------------------------------
+    const root = document.getElementById('screenRoot');
+    function render() {
+        if(State.step === 0) renderWelcome();
+        else if(State.step === 1) renderPersonalize();
+        else if(State.step === 2) renderActivation();
+        else if(State.step === 3) renderPriceAndStrategy();
+        else if(State.step === 4) renderActionsAndGrowth();
+        else if(State.step === 5) renderFinalKiller();
+    }
+
+    // Экран 0: Welcome — монетизация базы, объяснение продукта
+    function renderWelcome() {
+        root.innerHTML = `
+            <div class="screen active">
+                <h1>🔓 Ваша база клиентов — <span style="background: linear-gradient(135deg,#FFD966,#FF9F4A);-webkit-background-clip:text;background-clip:text;color:transparent;">спящий актив</span></h1>
+                <div class="desc">Вы уже накопили лояльную аудиторию. Card.Club помогает монетизировать её, закрывая главную боль путешествий и зарубежных оплат.</div>
+                <div class="desc"><strong>💳 Card.Club – виртуальные карты USD/EUR</strong><br>✅ Выпуск 5 минут • Пополнение рублями через СБП • Apple/Google Pay<br>✅ Никакого SWIFT, финмониторинга и бюрократии.<br>✅ Ваши клиенты платят за границей без блокировок, а вы зарабатываете <strong>50% с каждого выпуска</strong>.</div>
+                <div class="live-feed">📌 Пример: турагент с базой 1500 чел. уже заработал $2,340 за 3 месяца, просто проинформировав аудиторию.</div>
+                <button id="startWelcomeBtn">🚀 Рассчитать мой сценарий →</button>
+            </div>
+        `;
+        document.getElementById('startWelcomeBtn')?.addEventListener('click', () => { State.step = 1; render(); });
+    }
+
+    // Экран 1: Персонализация (выбор сегмента + база) – эффект Барнума
+    function renderPersonalize() {
+        let selectedSegment = State.segment;
+        let baseVal = State.baseClients;
+        root.innerHTML = `
+            <div class="screen active">
+                <h2>📋 Давайте знакомиться</h2>
+                <div class="desc">Цифры будут лично про вас. Выберите ваш бизнес и укажите текущую базу контактов (email, подписчики, клиенты) — это ваш главный актив.</div>
+                <div class="grid-2">
+                    <div class="card-choice ${selectedSegment === 'travel' ? 'active' : ''}" data-seg="travel">🌍 Турагентство / Визовый центр</div>
+                    <div class="card-choice ${selectedSegment === 'realty' ? 'active' : ''}" data-seg="realty">🏡 Недвижимость за рубежом</div>
+                    <div class="card-choice ${selectedSegment === 'online' ? 'active' : ''}" data-seg="online">📱 Онлайн-школа / Блогер</div>
+                </div>
+                <div class="slider-label"><span>👥 Ваша база (активных контактов)</span><span id="baseCountLabel">${baseVal}</span></div>
+                <input type="range" id="baseSlider" min="50" max="50000" step="10" value="${baseVal}">
+                <button id="nextPersonalize" style="margin-top:32px;">Далее →</button>
+            </div>
+        `;
+        document.querySelectorAll('.card-choice').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.card-choice').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+                State.segment = el.dataset.seg;
+            });
+        });
+        const baseSlider = document.getElementById('baseSlider');
+        const baseLabel = document.getElementById('baseCountLabel');
+        baseSlider.addEventListener('input', (e) => {
+            State.baseClients = parseInt(e.target.value);
+            baseLabel.innerText = State.baseClients;
+        });
+        document.getElementById('nextPersonalize').addEventListener('click', () => {
+            addXP(25, 0);
+            State.step = 2;
+            render();
+        });
+    }
+
+    // Экран 2: Активация кабинета + выпуск себе (с выбором для оплаты)
+    function renderActivation() {
+        root.innerHTML = `
+            <div class="screen active">
+                <h2>✅ Кабинет активирован!</h2>
+                <div class="desc">Ваша персональная партнёрская ссылка готова. Выпустите карту сами, чтобы протестировать преимущества.</div>
+                <div class="grid-2">
+                    <div class="card-choice" id="selfAIPath">🤖 <strong>ИИ и медиа:</strong> ChatGPT, Midjourney, Netflix, Spotify</div>
+                    <div class="card-choice" id="selfBizPath">💼 <strong>Бизнес-инфра:</strong> хостинг, CRM, Adobe, Figma, Git</div>
+                </div>
+                <div id="selfIssueMsg" class="desc" style="margin-top:12px;"></div>
+                <button id="nextAfterSelf" style="margin-top:20px;" disabled>Перейти к настройке →</button>
+            </div>
+        `;
+        let selfSelected = false;
+        const selfAIPath = document.getElementById('selfAIPath');
+        const selfBizPath = document.getElementById('selfBizPath');
+        const nextBtn = document.getElementById('nextAfterSelf');
+        const msgDiv = document.getElementById('selfIssueMsg');
+        const completeSelf = () => {
+            if(State.selfIssued) return;
+            State.selfIssued = true;
+            addXP(100, 50);
+            msgDiv.innerHTML = '🎉 Поздравляем! Вы выпустили карту и получили +100 XP + $50 бонус. Ачивка «Самотестер» активирована!';
+            nextBtn.disabled = false;
+        };
+        selfAIPath.addEventListener('click', () => {
+            completeSelf();
+            selfAIPath.style.opacity = '0.7'; selfBizPath.style.opacity = '0.7';
+        });
+        selfBizPath.addEventListener('click', completeSelf);
+        nextBtn.addEventListener('click', () => { State.step = 3; render(); });
+    }
+
+    // Экран 3: Цена и стратегия + сравнение с KZ/KG
+    function renderPriceAndStrategy() {
+        let price = State.cardPrice;
+        let strategy = State.strategy;
+        root.innerHTML = `
+            <div class="screen active">
+                <h2>💰 Установите цену выпуска для клиента</h2>
+                <div class="slider-label"><span>💳 Цена карты для клиента</span><span><strong id="priceVal">$${price}</strong> (ваша комиссия: $${(price*0.5).toFixed(0)})</span></div>
+                <input type="range" id="priceRange" min="20" max="200" step="5" value="${price}">
+                <div class="live-feed" style="margin:20px 0;">
+                    <div>⚖️ Сравнение с аналогами 🇰🇿/🇰🇬:</div>
+                    <div>❌ Выпуск карт в Казахстане / Киргизии: $250–300 + 10–30 дней ожидания + бюрократия + уведомление ФНС</div>
+                    <div>✅ Card.Club: <span id="dynamicPrice">$${price}</span> · выпуск 2 минуты · без ФНС · пополнение рублями через СБП</div>
+                </div>
+                <h3>🚀 Стратегия продвижения</h3>
+                <div class="grid-2">
+                    <div class="card-choice ${strategy === 'premium' ? 'active' : ''}" data-str="premium">👑 Премиум-каналы: высокая цена (6% конверсия)</div>
+                    <div class="card-choice ${strategy === 'mass' ? 'active' : ''}" data-str="mass">📢 Массовый выпуск: низкая цена, большая база (12% конверсия)</div>
+                    <div class="card-choice ${strategy === 'package' ? 'active' : ''}" data-str="package">🎁 Пакет + туры/визы: комплексное предложение (22% конверсия)</div>
+                </div>
+                <button id="nextPriceBtn">Далее →</button>
+            </div>
+        `;
+        const priceRange = document.getElementById('priceRange');
+        const priceValSpan = document.getElementById('priceVal');
+        const dynamicSpan = document.getElementById('dynamicPrice');
+        priceRange.addEventListener('input', (e) => {
+            State.cardPrice = parseInt(e.target.value);
+            priceValSpan.innerText = `$${State.cardPrice}`;
+            dynamicSpan.innerText = `$${State.cardPrice}`;
+        });
+        document.querySelectorAll('[data-str]').forEach(el => {
+            if(el.dataset.str === strategy) el.classList.add('active');
+            el.addEventListener('click', () => {
+                document.querySelectorAll('[data-str]').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+                State.strategy = el.dataset.str;
+            });
+        });
+        document.getElementById('nextPriceBtn').addEventListener('click', () => {
+            addXP(40, 0);
+            updateEconomy();
+            State.step = 4;
+            render();
+        });
+    }
+
+    // Экран 4: Действия, материалы, касания, рост графика
+    function renderActionsAndGrowth() {
+        let promo = State.promoReceived;
+        let campaigns = State.campaignsDone;
+        updateEconomy();
+        let currentIncome = State.final3mIncome;
+        let currentMonthIncome = currentIncome / 3;
+        let graphPercent = Math.min(100, (campaigns+1)*33);
+        root.innerHTML = `
+            <div class="screen active">
+                <h2>📈 Активность = доход</h2>
+                <div class="flex-between"><span>Промо-материалы</span> <span id="promoStatus">${promo ? '✅ Получены (+2% конверсии)' : '🔴 Не получены'}</span></div>
+                <button id="getMaterialsBtn" class="secondary" style="margin: 10px 0;">📚 Забрать готовые шаблоны (посты, сторис, видео)</button>
+                <div id="campaignsBlock">
+                    <div class="flex-between"><span>📨 Касания / рассылки</span><span>${campaigns} из 3</span></div>
+                    <button id="doCampaignBtn" ${campaigns >= 3 ? 'disabled' : ''} style="margin:10px 0;">✍️ Сделать касание (пост / рассылка)</button>
+                </div>
+                <div class="live-feed" id="liveFeedMock">💰 LIVE: Анна (турагент) +34 карты → +595$ комиссии</div>
+                <div class="stat" style="background:#102228; text-align:center;">📊 Прогноз дохода за 3 месяца: <strong id="income3mSpan">$${Math.floor(currentIncome)}</strong></div>
+                <div class="progress-bar" style="background:#2A4440; border-radius:20px; margin:12px 0;"><div style="width:${graphPercent}%; background:#FFD966; height:8px; border-radius:20px;"></div></div>
+                <button id="nextToFinalBtn" ${campaigns < 3 ? 'disabled' : ''}>✅ Продолжить к итогу</button>
+            </div>
+        `;
+        const getMaterials = document.getElementById('getMaterialsBtn');
+        const doCampaign = document.getElementById('doCampaignBtn');
+        const incomeSpan = document.getElementById('income3mSpan');
+        const nextFinal = document.getElementById('nextToFinalBtn');
+
+        function refreshGrowth() { updateEconomy(); incomeSpan.innerText = `$${Math.floor(State.final3mIncome)}`; if(doCampaign) if(State.campaignsDone >= 3) doCampaign.disabled = true; nextFinal.disabled = State.campaignsDone < 3; }
+
+        getMaterials.addEventListener('click', () => {
+            if(!State.promoReceived) {
+                State.promoReceived = true;
+                State.ltvFactor = 1.25;   // +0.10
+                addXP(70, 80);
+                document.getElementById('promoStatus').innerHTML = '✅ Получены (+2% конверсии, +0.10 LTV)';
+                getMaterials.disabled = true;
+                refreshGrowth();
+                // покажем ачивку попап
+                alert('🏆 Ачивка «Мастер контента»! +70 XP, +80$ бонус. Материалы готовы — используйте для касаний.');
+            }
+        });
+        doCampaign?.addEventListener('click', () => {
+            if(State.campaignsDone < 3) {
+                State.campaignsDone++;
+                addXP(60, 0);
+                refreshGrowth();
+                if(State.campaignsDone === 1) alert('✨ Ачивка «Первая волна» открыта! Доход растёт.');
+                else if(State.campaignsDone === 2) alert('🏅 «Массовый охват» +60 XP');
+                else if(State.campaignsDone === 3) { alert('🚀 Вы достигли 3 касаний! Доход масштабирован. Переходите к финалу.'); doCampaign.disabled = true; nextFinal.disabled = false; }
+                refreshGrowth();
+                const liveMsgs = ['🔥 Макс (недвижимость) +$1520', '🚀 Елена (визовый) +$960', '💎 Ольга (турагент) +$2100'];
+                const feed = document.getElementById('liveFeedMock');
+                if(feed) feed.innerHTML = `📢 ${liveMsgs[State.campaignsDone % liveMsgs.length]} · Ваш доход растёт!`;
+            }
+        });
+        nextFinal.addEventListener('click', () => { State.step = 5; render(); });
+        refreshGrowth();
+    }
+
+    // ФИНАЛ: Killer — прогноз, обещание себе, Reality Break
+    function renderFinalKiller() {
+        updateEconomy();
+        let twelve = State.final12mIncome;
+        let lost = State.finalLostPerDay;
+        let rank = document.getElementById('rankLabel').innerText;
+        let today = new Date().toLocaleDateString('ru-RU');
+        let promiseMsg = `Я, ${rank} партнёр Card.Club, обязуюсь к ${today} заработать $${Math.floor(twelve)} за первые 12 месяцев. Я выпущу карты для своей базы и достигну ранга ELITE.`;
+        State.promiseText = promiseMsg;
+        root.innerHTML = `
+            <div class="screen active">
+                <h2>🔥 Ваш потенциал</h2>
+                <div class="reality-break">
+                    <div>ПРОГНОЗ ДОХОДА ЗА 12 МЕСЯЦЕВ</div>
+                    <div class="income-big">$${Math.floor(twelve)}</div>
+                    <div>≈ $${Math.floor(twelve/12)} / месяц пассивно от партнёрской программы</div>
+                    <div style="margin-top:12px; border-top:1px solid #FFB347; padding-top:12px;">💔 КАЖДЫЙ ДЕНЬ БЕЗ ДЕЙСТВИЙ ВЫ ТЕРЯЕТЕ $${Math.floor(lost)}. Это стоимость вашего бездействия.</div>
+                </div>
+                <div class="badge-achieve">✉️ Моё обещание себе (капсула времени)</div>
+                <div class="live-feed" id="promiseTextArea" style="white-space: pre-wrap;">${promiseMsg}</div>
+                <div class="flex-between" style="gap:10px;">
+                    <button id="copyPromiseBtn" class="secondary">📋 Скопировать обещание</button>
+                    <button id="tgPromiseBtn" class="secondary">📱 Отправить себе в Telegram</button>
+                    <button id="emailPromiseBtn" class="secondary">✉️ Напомнить по email</button>
+                </div>
+                <div class="telegram-cta">
+                    <strong>🚀 Начать зарабатывать прямо сейчас</strong><br>
+                    Напишите Владимиру, получите кабинет, ссылку и все материалы.
+                    <button id="finalTelegramCTA" style="margin-top: 14px; background:#FFD966;">💬 Написать @Vladi_andr</button>
+                    <div class="desc" style="margin-top:12px;">Сообщение предзаполнено: «Я прошёл симулятор, готов монетизировать базу. Дайте доступ и реферальную ссылку»</div>
+                </div>
+                <div id="localStorageReminder" style="font-size:0.75rem; margin-top:15px; text-align:center;">🔔 Через 60 дней мы напомним вам об обещании</div>
+            </div>
+        `;
+        // localStorage reminder
+        if(!localStorage.getItem('cardclub_promise_date')) {
+            const future = new Date();
+            future.setDate(future.getDate() + 60);
+            localStorage.setItem('cardclub_promise_date', future.toISOString());
+            localStorage.setItem('cardclub_promise_text', promiseMsg);
+        }
+        document.getElementById('copyPromiseBtn')?.addEventListener('click', () => {
+            navigator.clipboard.writeText(promiseMsg);
+            alert('Обещание скопировано 👍');
+        });
+        document.getElementById('tgPromiseBtn')?.addEventListener('click', () => {
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(promiseMsg)}&text=${encodeURIComponent('Моё обещание партнёру Card.Club')}`, '_blank');
+        });
+        document.getElementById('emailPromiseBtn')?.addEventListener('click', () => {
+            window.location.href = `mailto:?subject=Моё обещание Card.Club&body=${encodeURIComponent(promiseMsg)}`;
+        });
+        document.getElementById('finalTelegramCTA')?.addEventListener('click', () => {
+            window.open('https://t.me/Vladi_andr', '_blank');
+        });
+    }
+
+    // старт
+    State.step = 0;
+    render();
+</script>
+</body>
+</html>
