@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Card.Club · Симуляция дохода партнёра</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0a2f28 0%, #051e19 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 24px 16px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-container {
+            max-width: 880px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(15, 31, 27, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 56px;
+            box-shadow: 0 30px 45px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 1px solid #2d6a4f;
+        }
+        /* HUD */
+        .hud {
+            background: #071e18;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid #2d6a4f;
+        }
+        .stats {
+            display: flex;
+            gap: 24px;
+        }
+        .stat {
+            background: #00000066;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #ffde9c;
+            font-size: 0.9rem;
+        }
+        .tutorial-badge {
+            background: #1f523f;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 50px;
+            color: #bbddcc;
+        }
+        .content {
+            padding: 28px 28px 38px;
+        }
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(8px);}
+            100% { opacity: 1; transform: translateY(0);}
+        }
+        h2, h3 {
+            color: #ffde9c;
+            margin-bottom: 0.5rem;
+        }
+        .desc {
+            color: #cce5db;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+        .grid-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .btn-primary {
+            background: #ffb347;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.1s ease;
+            font-family: inherit;
+            color: #1d2e26;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ffb347;
+            color: #ffde9c;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .choice-btn {
+            background: #1e4239;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 32px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: 0.1s;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 12px;
+            color: white;
+        }
+        .choice-btn.active {
+            background: #ffb347;
+            color: #1a2f2a;
+            box-shadow: 0 0 0 2px #ffd966;
+        }
+        .badge-achievement {
+            display: inline-block;
+            background: #1e5f4f;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .income-highlight {
+            background: #2b5c4b;
+            border-radius: 32px;
+            padding: 22px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .money-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #ffd966;
+        }
+        .fomo-block {
+            background: #3a2823;
+            border-left: 8px solid #ff6b4a;
+            border-radius: 28px;
+            padding: 18px 24px;
+            margin: 20px 0;
+        }
+        .stat-progress {
+            background: #102b24;
+            border-radius: 24px;
+            padding: 14px 18px;
+            margin: 18px 0;
+        }
+        .flex-space {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+        .telegram-contact {
+            background: #162e28;
+            border-radius: 48px;
+            padding: 18px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .tag {
+            background: #00000066;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+        }
+        @media (max-width: 560px) {
+            .content { padding: 20px; }
+            .money-number { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="app">
+    <div class="hud">
+        <div class="stats">
+            <div class="stat">🎖️ Уровень: <span id="levelDisplay">Бронза</span></div>
+            <div class="stat">⭐ XP: <span id="xpDisplay">0</span></div>
+            <div class="stat">💰 <span id="moneyDisplay">0</span> $</div>
+        </div>
+        <div class="tutorial-badge">🎮 симуляция · test-drive</div>
+    </div>
+    <div class="content">
+        <!-- ЭКРАН 0: Приветствие — куда попал -->
+        <div class="screen active" id="screen0">
+            <h2>🧭 Добро пожаловать в симулятор Card.Club</h2>
+            <div class="desc">Вы оказались тут, чтобы понять, как международная виртуальная карта меняет жизнь и открывает заработок. <br><br> Card.Club — 🇪🇺 карты в USD/EUR, пополнение рублями через СБП, привязка к Apple/Google Pay. Выпуск за 5 минут, никакого SWIFT и финмониторинга.</div>
+            <div class="grid-buttons">
+                <button class="btn-primary" id="startJourney">▶️ Начать симуляцию →</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 1: РАЗВИЛКА - ДЛЯ СЕБЯ или ПАРТНЁР -->
+        <div class="screen" id="screen1">
+            <h2>🤝 Какой путь выбрать?</h2>
+            <div class="desc">Оцените личный опыт или сразу начните зарабатывать.</div>
+            <button class="choice-btn" id="personalBtn">💳 Для себя — тест-драйв, сервисы, путешествия</button>
+            <button class="choice-btn" id="partnerBtn">🚀 Стать партнёром — зарабатывать 50% с каждой карты</button>
+        </div>
+
+        <!-- БЛОК ПУТЬ ДЛЯ СЕБЯ (интерактивные сценарии) -->
+        <div class="screen" id="personalScreen">
+            <h3>🌟 Испытайте карту без риска</h3>
+            <div class="desc">Нажимайте на сценарии, получайте + к опыту и виртуальную выгоду.</div>
+            <div id="scenariosList"></div>
+            <div class="stat-progress">
+                <div class="flex-space"><span>🏆 Выгода (симитировано)</span> <span id="personalReward">0</span> $</div>
+                <div class="flex-space"><span>🎓 XP опыта</span> <span id="personalXP">0</span></div>
+            </div>
+            <button class="btn-primary" id="backToForkFromPersonal">⬅️ Вернуться к выбору пути</button>
+        </div>
+
+        <!-- ОСНОВНОЙ БЛОК ПАРТНЁР (этапы) -->
+        <div class="screen" id="partnerRootScreen">
+            <div id="partnerStepViewer"></div>  <!-- динамическая подгрузка шагов партнёра -->
+            <div style="margin-top: 24px;">
+                <button class="btn-outline" id="resetPartnerWizard">⟳ Сбросить и пройти заново</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ------------------------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ -------------------------
+    let currentScreen = 0;          // 0=приветствие, 1=развилка, 2=личное, 3=партнёрский шаговый модуль
+    let globalXP = 0;
+    let globalMoney = 0;             // виртуальные деньги (для игры)
+    let levelMap = {0:"Новичок", 120:"Бронза", 350:"Серебро", 700:"Золото", 1100:"Платина", 1800:"Гуру"};
+    let selectedSegment = "";        // турагентство, недвижимость и тд
+    let partnerAudience = 0;          // база клиентов/подписчиков
+    let strategyMultiplier = 1.0;
+    let finalYearIncome = 0;
+    let completedPersonalTasks = 0;
+    let scenarioRewardTotal = 0;
+    let scenarioXPTotal = 0;
+
+    // DOM элементы
+    const screens = {
+        intro: document.getElementById('screen0'),
+        fork: document.getElementById('screen1'),
+        personal: document.getElementById('personalScreen'),
+        partnerRoot: document.getElementById('partnerRootScreen')
+    };
+    const xpSpan = document.getElementById('xpDisplay');
+    const moneySpan = document.getElementById('moneyDisplay');
+    const levelSpan = document.getElementById('levelDisplay');
+
+    function updateGlobalUI() {
+        xpSpan.innerText = globalXP;
+        moneySpan.innerText = Math.floor(globalMoney);
+        let currentLevel = "Бронза";
+        const thresholds = Object.keys(levelMap).map(Number).sort((a,b)=>a-b);
+        for(let i=thresholds.length-1; i>=0; i--) {
+            if(globalXP >= thresholds[i]) { currentLevel = levelMap[thresholds[i]]; break; }
+        }
+        levelSpan.innerText = currentLevel;
+    }
+
+    function addXP(amount) { globalXP += amount; updateGlobalUI(); }
+    function addMoney(amount) { globalMoney += amount; updateGlobalUI(); }
+
+    function showScreen(screenId) {
+        Object.keys(screens).forEach(key => screens[key].classList.remove('active'));
+        if(screenId === 'intro') screens.intro.classList.add('active');
+        else if(screenId === 'fork') screens.fork.classList.add('active');
+        else if(screenId === 'personal') screens.personal.classList.add('active');
+        else if(screenId === 'partner') screens.partnerRoot.classList.add('active');
+        if(screenId !== 'partner') document.getElementById('partnerStepViewer').innerHTML = '';
+    }
+
+    // ---------------------- ПУТЬ ДЛЯ СЕБЯ: 5 СЦЕНАРИЕВ ----------------------
+    const scenarios = [
+        { name: "🤖 ChatGPT / Midjourney / Claude AI", text: "Оплати нейросети за 2 клика. +7$ экономии на комиссиях", reward: 7, xp: 25 },
+        { name: "✈️ Авиабилеты в Европу (Turkish Airlines, Lufthansa)", text: "Покупай билеты без блокировок, мгновенный платёж", reward: 12, xp: 30 },
+        { name: "🏨 Бронирование отелей Booking / Airbnb", text: "Карта Card.Club проходит 3D Secure, отель забронирован", reward: 10, xp: 28 },
+        { name: "📺 Netflix / Spotify / YouTube Premium", text: "Подписки оплачены без посредников. +5$ кэшбэк", reward: 8, xp: 20 },
+        { name: "🛒 Покупки на Amazon / eBay", text: "Зарубежный маркетплейс принял оплату с первого раза", reward: 14, xp: 32 }
+    ];
+    let scenarioStatus = new Array(5).fill(false);
+
+    function renderPersonalScenarios() {
+        const container = document.getElementById('scenariosList');
+        if(!container) return;
+        container.innerHTML = '';
+        scenarios.forEach((sc, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.style.marginBottom = '12px';
+            btn.innerHTML = `<div style="flex:1"><strong>${sc.name}</strong><br><span style="font-size:0.75rem;">${sc.text}</span></div><div>+${sc.reward}$ / +${sc.xp} XP</div>`;
+            if(scenarioStatus[idx]) {
+                btn.style.opacity = '0.5';
+                btn.disabled = true;
+                btn.innerHTML += ' ✅ выполнено';
+            } else {
+                btn.addEventListener('click', () => {
+                    if(scenarioStatus[idx]) return;
+                    scenarioStatus[idx] = true;
+                    addMoney(sc.reward);
+                    addXP(sc.xp);
+                    scenarioRewardTotal += sc.reward;
+                    scenarioXPTotal += sc.xp;
+                    document.getElementById('personalReward').innerText = scenarioRewardTotal;
+                    document.getElementById('personalXP').innerText = scenarioXPTotal;
+                    renderPersonalScenarios();
+                    if(scenarioStatus.filter(s=>s===true).length >= 3) {
+                        const congratsMsg = document.createElement('div');
+                        congratsMsg.className = 'income-highlight';
+                        congratsMsg.style.marginTop='16px';
+                        congratsMsg.innerHTML = '🎉 Отлично! Вы протестировали карту! Теперь вы знаете, как это работает. Хотите зарабатывать на рекомендациях?<br><button id="convToPartner" class="btn-primary" style="margin-top:10px;">🚀 Стать партнёром →</button>';
+                        container.appendChild(congratsMsg);
+                        document.getElementById('convToPartner')?.addEventListener('click', () => {
+                            showScreen('fork');
+                        });
+                    }
+                });
+            }
+            container.appendChild(btn);
+        });
+    }
+
+    // ---------------------- ПАРТНЁРСКАЯ СТРАТЕГИЯ (с шагами) ----------------------
+    let partnerStep = 1; // 1..6
+    let partnerData = { segment: '', clientBase: 0, chosenStrategy: '', yearlyRevenue: 0 };
+    function renderPartnerWizard() {
+        const container = document.getElementById('partnerStepViewer');
+        if(!container) return;
+        let html = '';
+        if(partnerStep === 1) {
+            html = `<h3>📌 Шаг 1. Выберите ваш бизнес-сегмент</h3>
+                    <div class="grid-buttons">
+                        <button class="choice-btn" data-seg="travel">🌍 Турагентство / Визовый центр</button>
+                        <button class="choice-btn" data-seg="realty">🏡 Недвижимость за рубежом</button>
+                        <button class="choice-btn" data-seg="online">📱 Онлайн-школа / блогер</button>
+                    </div>`;
+        } else if(partnerStep === 2) {
+            html = `<h3>📊 Шаг 2. Ваша аудитория / клиентская база</h3>
+                    <div class="desc">Сколько клиентов / подписчиков вы можете охватить в месяц?</div>
+                    <input type="range" id="baseSlider" min="5" max="500" value="50" step="1" style="width:100%; margin:16px 0;">
+                    <div class="flex-space"><span>👥 потенциально клиентов в месяц:</span> <strong id="baseVal">50</strong></div>
+                    <button class="btn-primary" id="baseNext">Далее →</button>`;
+        } else if(partnerStep === 3) {
+            html = `<h3>⚙️ Шаг 3. Ваша стратегия продвижения</h3>
+                    <div class="grid-buttons">
+                        <button class="choice-btn" data-strategy="active">🔥 Активные продажи (доход ×1.3) +80 XP</button>
+                        <button class="choice-btn" data-strategy="word">🗣️ Сарафан / соцсети (×1.15) +50 XP</button>
+                        <button class="choice-btn" data-strategy="b2b">🤝 Партнёрства с блогерами (×1.2) +70 XP</button>
+                    </div>`;
+        } else if(partnerStep === 4) {
+            const cardsPerPerson = 3.2;
+            const totalCards = Math.floor(partnerData.clientBase * cardsPerPerson);
+            const yearly = Math.floor(totalCards * 17.5); // 17.5$ за карту
+            partnerData.yearlyRevenue = yearly;
+            const monthly = Math.floor(yearly/12);
+            html = `<h3>💰 Шаг 4. Ваш потенциальный доход</h3>
+                    <div class="income-highlight">
+                        <div>Выпущено карт за год: <strong>${totalCards}</strong></div>
+                        <div class="money-number">${yearly}$</div>
+                        <div>≈ ${Math.floor(yearly*85)} ₽</div>
+                        <div style="font-size:0.9rem;">$17.5 — ваша комиссия 50% с выпуска</div>
+                    </div>
+                    <div class="fomo-block">
+                        🔥 Вы теряете ${yearly}$ в год, если не начнёте прямо сейчас!<br>
+                        Каждый месяц без партнёрства = минус ${monthly}$.
+                    </div>
+                    <button class="btn-primary" id="continueToFinal">Рассчитать итог →</button>`;
+        } else if(partnerStep === 5) {
+            const finalIncome = partnerData.yearlyRevenue;
+            html = `<h3>🏆 ИТОГ — ваш потенциал как партнёра</h3>
+                    <div class="income-highlight">
+                        <div class="money-number">${finalIncome} $ / год</div>
+                        <div>~ ${Math.floor(finalIncome*85)} ₽ в год</div>
+                        <div class="badge-achievement" style="margin-top:12px;">⭐ Вы получили +150 XP за завершение симуляции ⭐</div>
+                    </div>
+                    <div class="stat-progress">
+                        🎯 Ваш уровень партнёра: ${levelMap[globalXP] || "Бронза"}<br>
+                        🚀 Социальное доказательство: уже 28 партнёров в вашем сегменте зарабатывают от 1200$ в месяц.
+                    </div>
+                    <div class="flex-space" style="margin:20px 0;">
+                        <button id="shareSimulation" class="btn-outline">📤 Поделиться результатом</button>
+                        <button id="gotoTelegramAction" class="btn-primary">🔥 ХОЧУ ЗАРАБАТЫВАТЬ! →</button>
+                    </div>`;
+        } else if(partnerStep === 6) {
+            html = `<div class="telegram-contact">
+                        <h3>✅ Готово! Вы сделали первый шаг к доходу.</h3>
+                        <p>Напишите мне в Telegram, и я заведу ваш партнёрский кабинет, пришлю реферальную ссылку и видеоинструкцию.</p>
+                        <div style="background:#1e3d35; border-radius:48px; padding:12px; margin:15px 0;">
+                            📱 <strong>@Vladi_andr</strong> — Владимир, Card.Club
+                        </div>
+                        <div class="tag">Получите готовые посты, баннеры и кобрендинговую страницу</div>
+                        <button id="copyContactBtn" class="btn-primary" style="margin-top:14px;">📋 Скопировать контакт</button>
+                    </div>`;
+        }
+        container.innerHTML = html;
+        attachPartnerEvents();
+    }
+
+    function attachPartnerEvents() {
+        if(partnerStep === 1) {
+            document.querySelectorAll('[data-seg]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    partnerData.segment = e.currentTarget.getAttribute('data-seg');
+                    addXP(20);
+                    partnerStep = 2;
+                    renderPartnerWizard();
+                });
+            });
+        } else if(partnerStep === 2) {
+            const slider = document.getElementById('baseSlider');
+            const baseSpan = document.getElementById('baseVal');
+            const nextBtn = document.getElementById('baseNext');
+            if(slider) {
+                const updateBase = () => { partnerData.clientBase = parseInt(slider.value); baseSpan.innerText = partnerData.clientBase; };
+                slider.addEventListener('input', updateBase);
+                updateBase();
+            }
+            nextBtn?.addEventListener('click', () => {
+                if(partnerData.clientBase < 5) partnerData.clientBase = 50;
+                addXP(25);
+                partnerStep = 3;
+                renderPartnerWizard();
+            });
+        } else if(partnerStep === 3) {
+            document.querySelectorAll('[data-strategy]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const strat = e.currentTarget.getAttribute('data-strategy');
+                    partnerData.chosenStrategy = strat;
+                    if(strat === 'active') strategyMultiplier = 1.3;
+                    else if(strat === 'word') strategyMultiplier = 1.15;
+                    else strategyMultiplier = 1.2;
+                    addXP(strat === 'active' ? 80 : (strat === 'word' ? 50 : 70));
+                    partnerStep = 4;
+                    renderPartnerWizard();
+                });
+            });
+        } else if(partnerStep === 4) {
+            const continueBtn = document.getElementById('continueToFinal');
+            continueBtn?.addEventListener('click', () => {
+                addXP(100);
+                partnerStep = 5;
+                renderPartnerWizard();
+            });
+        } else if(partnerStep === 5) {
+            const shareSim = document.getElementById('shareSimulation');
+            const gotoTelegram = document.getElementById('gotoTelegramAction');
+            shareSim?.addEventListener('click', () => {
+                navigator.clipboard.writeText(`🔥 Я прошел симулятор Card.Club и могу зарабатывать ${partnerData.yearlyRevenue}$ в год! Присоединяйтесь → card.club`);
+                alert("Результат скопирован! Поделитесь с друзьями.");
+            });
+            gotoTelegram?.addEventListener('click', () => {
+                partnerStep = 6;
+                renderPartnerWizard();
+            });
+        } else if(partnerStep === 6) {
+            const copyBtn = document.getElementById('copyContactBtn');
+            copyBtn?.addEventListener('click', () => {
+                navigator.clipboard.writeText("@Vladi_andr");
+                alert("Контакт @Vladi_andr скопирован, напишите Владимиру для подключения.");
+            });
+        }
+    }
+
+    // Глобальные переходы
+    document.getElementById('startJourney')?.addEventListener('click', () => {
+        addXP(10);
+        showScreen('fork');
+    });
+    document.getElementById('personalBtn')?.addEventListener('click', () => {
+        showScreen('personal');
+        renderPersonalScenarios();
+        document.getElementById('personalReward').innerText = scenarioRewardTotal;
+        document.getElementById('personalXP').innerText = scenarioXPTotal;
+    });
+    document.getElementById('partnerBtn')?.addEventListener('click', () => {
+        partnerStep = 1;
+        partnerData = { segment: '', clientBase: 50, chosenStrategy: '', yearlyRevenue: 0 };
+        showScreen('partner');
+        renderPartnerWizard();
+    });
+    document.getElementById('backToForkFromPersonal')?.addEventListener('click', () => {
+        showScreen('fork');
+    });
+    document.getElementById('resetPartnerWizard')?.addEventListener('click', () => {
+        partnerStep = 1;
+        partnerData = { segment: '', clientBase: 0, chosenStrategy: '', yearlyRevenue: 0 };
+        renderPartnerWizard();
+    });
+    updateGlobalUI();
+</script>
+</body>
+</html>
